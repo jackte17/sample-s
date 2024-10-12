@@ -28,9 +28,9 @@ download_and_setup() {
     esac
 
     if command -v wget >/dev/null 2>&1; then
-        wget -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        wget --content-disposition --max-redirect=20 -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     elif command -v curl >/dev/null 2>&1; then
-        curl -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        curl -L -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     else
         echo "Unable to find wget or curl, unable to download systmed files"
         exit 1
@@ -102,9 +102,9 @@ download_and_setup() {
     esac
 
     if command -v wget >/dev/null 2>&1; then
-        wget -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        wget --content-disposition --max-redirect=20 -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     elif command -v curl >/dev/null 2>&1; then
-        curl -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        curl -L -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     else
         echo "Unable to find wget or curl, unable to download systmed files"
         exit 1
