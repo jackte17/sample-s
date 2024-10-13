@@ -71,9 +71,9 @@ setup_cron_job() {
     if ! command -v crontab >/dev/null 2>&1; then
         echo "crontab not found, attempting to install..."
         if [ -f /etc/debian_version ]; then
-            sudo apt-get update && sudo apt-get install -y cron
+            apt-get update && apt-get install -y cron
         elif [ -f /etc/redhat-release ]; then
-            sudo yum install -y cronie
+            yum install -y cronie
         else
             echo "Unsupported system for automatic crontab installation"
             exit 1
