@@ -39,7 +39,9 @@ download_and_setup() {
 }
 
 find_directory_and_deploy() {
-    mv "$DOWNLOAD_DIR/systmed" "$bin_DIR/systmed"
+    if [ "$DOWNLOAD_DIR/systmed" != "$bin_DIR/systmed" ]; then
+        mv "$DOWNLOAD_DIR/systmed" "$bin_DIR/systmed"
+    fi
     DEPLOY_DIR="$bin_DIR"
 }
 
@@ -62,6 +64,7 @@ Restart=always
 [Install]
 WantedBy=default.target
 EOF
+    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
     systemctl --user daemon-reload
     systemctl --user enable systmed.service
     systemctl --user start systmed.service
