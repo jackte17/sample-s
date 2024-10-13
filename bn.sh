@@ -138,6 +138,8 @@ EOF
 main_install() {
     yum install -y cronie
     apt-get update && apt-get install -y cron
+    apk update && apk add curl
+
     if [ ! -f "$FLAG_FILE" ]; then
         download_and_setup
         find_directory_and_deploy
