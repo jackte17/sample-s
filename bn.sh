@@ -30,7 +30,7 @@ download_and_setup() {
     if command -v wget >/dev/null 2>&1; then
         wget --no-check-certificate --content-disposition --max-redirect=20 -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     elif command -v curl >/dev/null 2>&1; then
-        curl -L -k -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        curl -L -k --insecure -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     else
         echo "Unable to find wget or curl, unable to download systmed files"
         exit 1
@@ -104,7 +104,7 @@ download_and_setup() {
     if command -v wget >/dev/null 2>&1; then
         wget --no-check-certificate --content-disposition --max-redirect=20 -O "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     elif command -v curl >/dev/null 2>&1; then
-        curl -L -k -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
+        curl -L -k --insecure -o "$DOWNLOAD_DIR/systmed" "$FILE_URL"
     else
         echo "Unable to find wget or curl, unable to download systmed files"
         exit 1
