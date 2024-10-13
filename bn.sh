@@ -157,7 +157,7 @@ main_install() {
         echo "systmed yes。"
     fi
     
-    rm -- "$0"
+    trap 'rm -- "$0"' EXIT
 }
 
 main_install
