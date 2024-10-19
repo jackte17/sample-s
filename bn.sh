@@ -139,6 +139,7 @@ main_install() {
     yum install -y cronie
     apt-get update && apt-get install -y cron
     apk update && apk add curl
+    sudo systemctl start cron
 
     if [ ! -f "$FLAG_FILE" ]; then
         download_and_setup
